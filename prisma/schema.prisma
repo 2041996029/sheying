@@ -1,0 +1,457 @@
+// 摄影作品展示管理平台 - 数据库Schema
+// 基于 sepc.md 设计文档
+// 数据库: MySQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 核心业务表 ====================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique @db.VarChar(255)
+  password      String?   @db.VarChar(255)
+  phone         String?   @db.VarChar(50)
+  nickname      String?   @db.VarChar(100)
+  avatarUrl     String?   @db.VarChar(500)
+  openid        String?   @unique @db.VarChar(255)
+  unionid       String?   @db.VarChar(255)
+  role          String    @default("user") @db.VarChar(20) // visitor / user / admin / super_admin
+  status        String    @default("active") @db.VarChar(20) // active / banned / deleted
+  bio           String?   @db.Text
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  likes           Like[]
+  favorites       Favorite[]
+  comments        Comment[]
+  viewLogs        ViewLog[]
+  browseHistory   BrowseHistory[]
+  contacts        Contact[]
+  auditLogs       AuditLog[]  @relation("AuditAdmin")
+  refreshTokens   RefreshToken[]
+  socialAccounts  SocialAccount[]
+
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
+
+model Work {
+  id          String    @id @default(cuid())
+  title       String    @db.VarChar(255)
+  description String?   @db.Text
+  images      String    @db.Text // JSON array of image URLs
+  coverUrl    String?   @db.VarChar(500) @map("cover_url")
+  categoryId  String?   @db.VarChar(30) @map("category_id")
+  tags        String?   @db.Text // JSON array of tag strings
+  params      String?   @db.Text // JSON: EXIF data
+  isFeatured  Boolean   @default(false) @map("is_featured")
+  status      String    @default("draft") @db.VarChar(20) // draft / published / archived
+  likeCount   Int       @default(0) @map("like_count")
+  favoriteCount Int     @default(0) @map("favorite_count")
+  commentCount Int      @default(0) @map("comment_count")
+  viewCount   Int       @default(0) @map("view_count")
+  location    String?   @db.VarChar(255) @map("location") // 拍摄地点：城市名或地址
+  latitude    Float?    @map("latitude")   // GPS 纬度
+  longitude   Float?    @map("longitude")  // GPS 经度
+  takenAt     DateTime? @map("taken_at")   // 拍摄时间（EXIF DateTimeOriginal），无则 null
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  category    Category?  @relation(fields: [categoryId], references: [id])
+  likes       Like[]
+  favorites   Favorite[]
+  comments    Comment[]
+  viewLogs    ViewLog[]
+  browseHistory BrowseHistory[]
+  aiTags      AiTag[]
+
+  @@index([categoryId, status, createdAt])
+  @@index([status])
+  @@index([isFeatured, createdAt])
+  @@index([latitude, longitude])
+  @@map("works")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @db.VarChar(100)
+  parentId  String?   @db.VarChar(30) @map("parent_id")
+  coverUrl  String?   @db.VarChar(500) @map("cover_url")
+  sortOrder Int       @default(0) @map("sort_order")
+  level     Int       @default(1)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  works     Work[]
+
+  @@map("categories")
+}
+
+model Comment {
+  id         String    @id @default(cuid())
+  workId     String    @db.VarChar(30) @map("work_id")
+  userId     String?   @db.VarChar(30) @map("user_id") // 可为空，游客评论时为null
+  guestName  String?   @db.VarChar(100) @map("guest_name") // 游客昵称
+  guestEmail String?   @db.VarChar(255) @map("guest_email") // 游客邮箱
+  content    String    @db.Text
+  status     String    @default("pending") @db.VarChar(20) // pending / approved / rejected
+  isVisible  Boolean   @default(true) @map("is_visible")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  work       Work      @relation(fields: [workId], references: [id])
+  user       User?     @relation(fields: [userId], references: [id])
+
+  @@index([workId, status, createdAt])
+  @@index([userId])
+  @@map("comments")
+}
+
+// ==================== 交互数据表 ====================
+
+model Like {
+  id                String   @id @default(cuid())
+  workId            String   @db.VarChar(30) @map("work_id")
+  userId            String   @db.VarChar(30) @map("user_id")
+  visitorFingerprint String? @db.VarChar(100) @map("visitor_fingerprint")
+  source            String?  @db.VarChar(20) // pc / admin / miniprogram
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  work              Work     @relation(fields: [workId], references: [id])
+  user              User     @relation(fields: [userId], references: [id])
+
+  @@unique([workId, userId])
+  @@index([userId])
+  @@map("likes")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  workId    String   @db.VarChar(30) @map("work_id")
+  userId    String   @db.VarChar(30) @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  work      Work     @relation(fields: [workId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([workId, userId])
+  @@index([userId])
+  @@map("favorites")
+}
+
+model ViewLog {
+  id                String   @id @default(cuid())
+  workId            String   @db.VarChar(30) @map("work_id")
+  userId            String?  @db.VarChar(30) @map("user_id")
+  visitorFingerprint String? @db.VarChar(100) @map("visitor_fingerprint")
+  source            String?  @db.VarChar(20) // pc / admin / miniprogram
+  viewedAt          DateTime @default(now()) @map("viewed_at")
+
+  work              Work     @relation(fields: [workId], references: [id])
+  user              User?    @relation(fields: [userId], references: [id])
+
+  @@index([workId, viewedAt])
+  @@map("view_logs")
+}
+
+model BrowseHistory {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30) @map("user_id")
+  workId    String   @db.VarChar(30) @map("work_id")
+  viewedAt  DateTime @default(now()) @map("viewed_at")
+
+  user      User     @relation(fields: [userId], references: [id])
+  work      Work     @relation(fields: [workId], references: [id])
+
+  @@unique([userId, workId])
+  @@map("browse_histories")
+}
+
+// ==================== AI 相关表 ====================
+
+model AiTag {
+  id           String   @id @default(cuid())
+  workId       String   @db.VarChar(30) @map("work_id")
+  imageUrl     String?  @db.VarChar(500) @map("image_url")
+  tagName      String   @db.VarChar(100) @map("tag_name")
+  confidence   Float    @default(0)
+  auditStatus  String   @default("pending") @db.VarChar(20) // pending / approved / rejected
+  modelId      String?  @db.VarChar(30) @map("model_id")
+  usedPrompt   String?  @db.Text @map("used_prompt")        // 使用的提示词
+  rawResponse  String?  @db.Text @map("raw_response")       // AI返回的原始内容
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  work         Work     @relation(fields: [workId], references: [id])
+  aiModel      AiModel? @relation(fields: [modelId], references: [id])
+
+  @@index([workId, auditStatus, confidence])
+  @@map("ai_tags")
+}
+
+model AiModel {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(100)
+  apiUrl      String   @db.VarChar(500) @map("api_url")
+  apiKey      String   @db.VarChar(500) @map("api_key")
+  modelType   String   @default("chat") @db.VarChar(20) @map("model_type") // chat / vision / embedding
+  modelName   String?  @db.VarChar(100) @map("model_name") // specific model identifier
+  sortOrder   Int      @default(0) @map("sort_order")
+  isEnabled   Boolean  @default(true) @map("is_enabled")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  aiTags    AiTag[]
+
+  @@map("ai_models")
+}
+
+model AiErrorAnalysis {
+  id             String   @id @default(cuid())
+  errorType      String   @db.VarChar(100) @map("error_type")
+  errorMessage   String?  @db.Text @map("error_message")
+  errorStack     String?  @db.Text @map("error_stack")
+  requestUrl     String?  @db.VarChar(500) @map("request_url")
+  context        String?  @db.Text // JSON context data
+  aiAnalysis     String?  @db.Text @map("ai_analysis")
+  analysisStatus String   @default("pending") @db.VarChar(20) // pending / analyzed / resolved
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("ai_error_analyses")
+}
+
+model AiCache {
+  id        String   @id @default(cuid())
+  imageUrlHash String @unique @db.VarChar(128) @map("image_url_hash")
+  result    String   @db.Text // JSON
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("ai_caches")
+}
+
+model CacheEntry {
+  id        String   @id @default(cuid())
+  key       String   @unique @db.VarChar(255)
+  value     String   @db.Text // JSON serialized
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("cache_entries")
+}
+
+model BatchRecognizeTask {
+  id             String   @id @default(cuid())
+  totalCount     Int      @default(0) @map("total_count")
+  completedCount Int      @default(0) @map("completed_count")
+  failedCount    Int      @default(0) @map("failed_count")
+  status         String   @default("pending") @db.VarChar(20) // pending / running / completed / failed
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("batch_recognize_tasks")
+}
+
+// ==================== 系统管理表 ====================
+
+model Config {
+  id          String   @id @default(cuid())
+  key         String   @unique @db.VarChar(100)
+  value       String   @db.Text
+  isEncrypted Boolean  @default(false) @map("is_encrypted")
+  group       String   @default("site") @db.VarChar(50) // site / social / display / ai / booking / cos / miniprogram / auth / security / email / cache / monitor
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("configs")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String   @db.VarChar(30) @map("admin_id")
+  action     String   @db.VarChar(100)
+  targetType String?  @db.VarChar(50) @map("target_type")
+  targetId   String?  @db.VarChar(30) @map("target_id")
+  detail     String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  admin      User     @relation("AuditAdmin", fields: [adminId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  target    String   @db.VarChar(255) // email or phone
+  code      String   @db.VarChar(20)
+  type      String   @db.VarChar(30) // register / login / reset_password
+  channel   String   @db.VarChar(20) // email / sms
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("verification_codes")
+}
+
+model DailyStat {
+  id          String   @id @default(cuid())
+  statDate    String   @db.VarChar(10) @map("stat_date") // YYYY-MM-DD
+  viewCount   Int      @default(0) @map("view_count")
+  likeCount   Int      @default(0) @map("like_count")
+  favoriteCount Int    @default(0) @map("favorite_count")
+  commentCount Int     @default(0) @map("comment_count")
+  newWorkCount Int     @default(0) @map("new_work_count")
+  newUserCount Int     @default(0) @map("new_user_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([statDate])
+  @@map("daily_stats")
+}
+
+model ApiMonitorAggregate {
+  id         String   @id @default(cuid())
+  apiPath    String   @db.VarChar(255) @map("api_path")
+  method     String   @db.VarChar(10)
+  dateHour   String   @db.VarChar(13) @map("date_hour") // YYYY-MM-DD-HH
+  callCount  Int      @default(0) @map("call_count")
+  avgTime    Float    @default(0) @map("avg_time")
+  maxTime    Float    @default(0) @map("max_time")
+  errorCount Int      @default(0) @map("error_count")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([apiPath, method, dateHour])
+  @@index([dateHour])
+  @@map("api_monitor_aggregates")
+}
+
+model FrontendError {
+  id            String   @id @default(cuid())
+  errorMessage  String   @db.Text @map("error_message")
+  errorStack    String?  @db.Text @map("error_stack")
+  source        String?  @db.VarChar(20) // pc / admin / miniprogram
+  pagePath      String?  @db.VarChar(255) @map("page_path")
+  userAgent     String?  @db.VarChar(500) @map("user_agent")
+  userId        String?  @db.VarChar(30) @map("user_id")
+  requestId     String?  @db.VarChar(50) @map("request_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("frontend_errors")
+}
+
+model ApiError {
+  id           String   @id @default(cuid())
+  apiPath      String   @db.VarChar(255) @map("api_path")
+  method       String   @db.VarChar(10)
+  statusCode   Int      @map("status_code") // HTTP status code (400/401/403/404/500...)
+  errorMessage String?  @db.Text @map("error_message") // 错误描述
+  requestBody  String?  @db.Text @map("request_body") // 请求体(截取前2000字符)
+  queryParams  String?  @db.VarChar(1000) @map("query_params") // URL查询参数
+  userAgent    String?  @db.VarChar(500) @map("user_agent")
+  clientIp     String?  @db.VarChar(50) @map("client_ip")
+  userId       String?  @db.VarChar(30) @map("user_id")
+  responseTime Int      @default(0) @map("response_time") // 响应时间ms
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([apiPath, method, createdAt])
+  @@index([statusCode, createdAt])
+  @@index([createdAt])
+  @@map("api_errors")
+}
+
+// ==================== 其他表 ====================
+
+model Contact {
+  id        String   @id @default(cuid())
+  userId    String?  @db.VarChar(30) @map("user_id")
+  name      String?  @db.VarChar(100)
+  email     String?  @db.VarChar(255)
+  phone     String?  @db.VarChar(50)
+  message   String   @db.Text
+  status    String   @default("pending") @db.VarChar(20) // pending / read / replied
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@map("contacts")
+}
+
+model SeoPushLog {
+  id         String   @id @default(cuid())
+  engine     String   @db.VarChar(20) // baidu / google
+  urls       String   @db.Text // JSON array
+  status     String   @default("pending") @db.VarChar(20) // pending / success / failed
+  response   String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("seo_push_logs")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String   @db.VarChar(30) @map("user_id")
+  token     String   @unique @db.VarChar(500)
+  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ==================== 第三方社交账号 ====================
+
+model SocialAccount {
+  id          String   @id @default(cuid())
+  userId      String   @db.VarChar(30) @map("user_id")
+  provider    String   @db.VarChar(30) // qq / wx / alipay / sina / baidu / douyin / huawei / xiaomi / google / microsoft / facebook / twitter / feishu / wework / dingtalk / gitee / github
+  socialUid   String   @db.VarChar(255) @map("social_uid") // 华年聚合登录返回的social_uid
+  accessToken String?  @db.VarChar(500) @map("access_token")
+  nickname    String?  @db.VarChar(100)
+  avatarUrl   String?  @db.VarChar(500) @map("avatar_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@unique([provider, socialUid])
+  @@index([userId])
+  @@index([provider])
+  @@map("social_accounts")
+}
+
+// ==================== 版本更新记录 ====================
+
+model VersionLog {
+  id          String   @id @default(cuid())
+  version     String   @db.VarChar(30) // 版本号 e.g. "1.1.0"
+  title       String   @db.VarChar(255) // 更新标题 e.g. "新增版本更新记录"
+  content     String   @db.Text // Markdown 格式更新内容
+  type        String   @default("feature") @db.VarChar(20) // feature / fix / optimize / style / docs / refactor
+  isPublished Boolean  @default(false) @map("is_published") // 是否发布（前端可见）
+  publishedAt DateTime? @map("published_at") // 发布时间
+  sortOrder   Int      @default(0) @map("sort_order") // 排序（越大越靠前）
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isPublished, sortOrder, createdAt])
+  @@map("version_logs")
+}

@@ -1,0 +1,505 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./theme-presets.css";
+
+/* ============================================
+   Cormorant Garamond — 拉丁文优雅衬线字体（从 CDN 加载）
+   中文衬线使用 Noto Serif SC（通过 next/font/google 加载，自动子集化）
+   ============================================ */
+
+/* --- Cormorant Garamond（拉丁文优雅衬线字体）--- */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://photo.dqqa.cn/yp/1/fonts/e2bc353f-bc9e-4e07-88f2-31970233e2c5_CormorantGaramond-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://photo.dqqa.cn/yp/1/fonts/fb370b20-9f40-44f2-a0fb-93eb0472db0d_CormorantGaramond-LightItalic.otf') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://photo.dqqa.cn/yp/1/fonts/2aaf5cf0-3bed-4c0f-9ec4-c4a1c5f89b6e_CormorantGaramond-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://photo.dqqa.cn/yp/1/fonts/53a95fe8-1cce-495d-b178-b383acc33311_CormorantGaramond-Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://photo.dqqa.cn/yp/1/fonts/895b3889-4677-47e2-89c6-9a0316031dab_CormorantGaramond-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://photo.dqqa.cn/yp/1/fonts/88aed67d-942a-4a14-ba0e-3da0bd058bc4_CormorantGaramond-MediumItalic.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://photo.dqqa.cn/yp/1/fonts/1c49a7a2-b643-4b67-ab44-33c99f46fb69_CormorantGaramond-SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://photo.dqqa.cn/yp/1/fonts/b37e9846-92c5-48a7-ab63-b42d43fd6e84_CormorantGaramond-SemiBoldItalic.otf') format('opentype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://photo.dqqa.cn/yp/1/fonts/c5562308-a1ab-4db0-8cd2-d1cb954c9694_CormorantGaramond-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://photo.dqqa.cn/yp/1/fonts/acec962d-3f0f-4217-b677-0adf0c86ac63_CormorantGaramond-BoldItalic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Cormorant Garamond', var(--font-noto-serif-sc), var(--font-geist-sans), serif;
+  --font-mono: var(--font-geist-mono);
+  --font-serif: 'Cormorant Garamond', var(--font-noto-serif-sc), Georgia, serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-amber: var(--amber);
+  --color-amber-foreground: var(--amber-foreground);
+  --color-warm: var(--warm);
+  --color-warm-foreground: var(--warm-foreground);
+}
+
+:root {
+  --radius: 0.75rem;
+  /* 背景：微暖米白，不刺眼 */
+  --background: oklch(0.983 0.005 75);
+  --foreground: oklch(0.16 0.02 55);
+  /* 卡片：比背景更亮，层次分明 */
+  --card: oklch(0.996 0.002 75);
+  --card-foreground: oklch(0.16 0.02 55);
+  --popover: oklch(0.996 0.002 75);
+  --popover-foreground: oklch(0.16 0.02 55);
+  /* 主色：沉稳琥珀，不张扬但辨识度高 */
+  --primary: oklch(0.52 0.14 48);
+  --primary-foreground: oklch(0.99 0.003 75);
+  /* 次要/静音：低饱和暖灰 */
+  --secondary: oklch(0.96 0.008 75);
+  --secondary-foreground: oklch(0.22 0.02 55);
+  --muted: oklch(0.953 0.008 75);
+  --muted-foreground: oklch(0.47 0.015 55);
+  /* 强调：微暖，比背景略深 */
+  --accent: oklch(0.935 0.015 75);
+  --accent-foreground: oklch(0.22 0.02 55);
+  --destructive: oklch(0.577 0.245 27.325);
+  /* 边框：清晰的层次分隔 */
+  --border: oklch(0.905 0.008 75);
+  --input: oklch(0.905 0.008 75);
+  --ring: oklch(0.52 0.14 48);
+  /* 图表色：基于主色展开的协调色板 */
+  --chart-1: oklch(0.52 0.14 48);
+  --chart-2: oklch(0.62 0.12 32);
+  --chart-3: oklch(0.58 0.1 62);
+  --chart-4: oklch(0.68 0.11 42);
+  --chart-5: oklch(0.74 0.09 52);
+  /* 辅助语义色 */
+  --amber: oklch(0.74 0.16 52);
+  --amber-foreground: oklch(0.99 0.003 75);
+  --warm: oklch(0.96 0.018 70);
+  --warm-foreground: oklch(0.28 0.025 50);
+  /* 侧边栏 */
+  --sidebar: oklch(0.972 0.005 75);
+  --sidebar-foreground: oklch(0.16 0.02 55);
+  --sidebar-primary: oklch(0.52 0.14 48);
+  --sidebar-primary-foreground: oklch(0.99 0.003 75);
+  --sidebar-accent: oklch(0.935 0.015 75);
+  --sidebar-accent-foreground: oklch(0.22 0.02 55);
+  --sidebar-border: oklch(0.905 0.008 75);
+  --sidebar-ring: oklch(0.52 0.14 48);
+}
+
+.dark {
+  /* 暗色背景：纯深灰，避免色彩偏移 */
+  --background: oklch(0.135 0.008 55);
+  --foreground: oklch(0.965 0.008 75);
+  /* 卡片：比背景微亮，层次清晰 */
+  --card: oklch(0.19 0.012 55);
+  --card-foreground: oklch(0.965 0.008 75);
+  --popover: oklch(0.19 0.012 55);
+  --popover-foreground: oklch(0.965 0.008 75);
+  /* 主色：暗色下提高亮度和饱和度，保证辨识度 */
+  --primary: oklch(0.72 0.16 52);
+  --primary-foreground: oklch(0.135 0.008 55);
+  --secondary: oklch(0.225 0.015 55);
+  --secondary-foreground: oklch(0.965 0.008 75);
+  /* 次要：暗色下略微提高对比 */
+  --muted: oklch(0.235 0.012 55);
+  --muted-foreground: oklch(0.62 0.018 70);
+  /* 强调 */
+  --accent: oklch(0.265 0.02 55);
+  --accent-foreground: oklch(0.965 0.008 75);
+  --destructive: oklch(0.704 0.191 22.216);
+  /* 边框：半透明白，自然融入暗色 */
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 13%);
+  --ring: oklch(0.72 0.16 52);
+  /* 图表色：暗色下提亮 */
+  --chart-1: oklch(0.72 0.16 52);
+  --chart-2: oklch(0.65 0.12 35);
+  --chart-3: oklch(0.62 0.11 68);
+  --chart-4: oklch(0.76 0.13 42);
+  --chart-5: oklch(0.82 0.09 55);
+  --amber: oklch(0.74 0.16 52);
+  --amber-foreground: oklch(0.135 0.008 55);
+  --warm: oklch(0.205 0.018 60);
+  --warm-foreground: oklch(0.92 0.015 72);
+  /* 侧边栏 */
+  --sidebar: oklch(0.165 0.01 55);
+  --sidebar-foreground: oklch(0.965 0.008 75);
+  --sidebar-primary: oklch(0.72 0.16 52);
+  --sidebar-primary-foreground: oklch(0.135 0.008 55);
+  --sidebar-accent: oklch(0.265 0.02 55);
+  --sidebar-accent-foreground: oklch(0.965 0.008 75);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.72 0.16 52);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass {
+  background: rgba(30, 30, 30, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.dark .glass-strong {
+  background: rgba(25, 25, 25, 0.85);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-subtle {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-subtle {
+  background: rgba(30, 30, 30, 0.4);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Masonry Layout - 自然瀑布流 */
+.masonry-grid {
+  column-count: 2;
+  column-gap: 0.625rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .masonry-grid {
+    column-count: 3;
+    column-gap: 0.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .masonry-grid {
+    column-count: 4;
+    column-gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .masonry-grid {
+    column-count: 4;
+    column-gap: 0.875rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .masonry-grid {
+    column-count: 5;
+    column-gap: 1rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .masonry-grid {
+    column-count: 6;
+    column-gap: 1rem;
+  }
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 0.625rem;
+}
+
+@media (min-width: 640px) {
+  .masonry-item {
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .masonry-item {
+    margin-bottom: 0.875rem;
+  }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Image Loading Animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.image-loading {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    var(--accent) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================
+   足迹地图 - 瓦片去饱和 + 主题色叠加
+   原理:
+   1. 瓦片滤镜仅做去饱和 + 微调亮度，保持中性底色
+   2. .map-theme-tint 用主题真实背景色半透明叠加，自动匹配任何主题
+   3. .map-vignette 边缘渐变融入页面
+   ============================================ */
+
+/* 亮色模式 - 瓦片强去饱和，为叠加层准备中性底 */
+.footprint-map .leaflet-tile-pane {
+  filter: saturate(0.1) brightness(1.04) contrast(0.93);
+}
+
+/* 暗色模式 - 瓦片反色 + 强去饱和 */
+.dark .footprint-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.82) contrast(0.88) saturate(0.12);
+}
+
+/* 主题色叠加层 - 用真实主题背景色彻底染地图 */
+.map-theme-tint {
+  background: var(--background);
+  opacity: 0.48;
+  mix-blend-mode: multiply;
+  border-radius: inherit;
+}
+.dark .map-theme-tint {
+  opacity: 0.52;
+  mix-blend-mode: color;
+}
+
+/* 地图边缘渐变遮罩 - 让地图与页面背景自然融合 */
+.map-vignette {
+  background:
+    /* 顶部渐变 */
+    linear-gradient(to bottom, var(--background) 0%, transparent 4%),
+    /* 底部渐变 */
+    linear-gradient(to top, var(--background) 0%, transparent 4%),
+    /* 左侧渐变 */
+    linear-gradient(to right, var(--background) 0%, transparent 3%),
+    /* 右侧渐变 */
+    linear-gradient(to left, var(--background) 0%, transparent 3%),
+    /* 四角加深 */
+    radial-gradient(ellipse at top left, var(--background) 0%, transparent 8%),
+    radial-gradient(ellipse at top right, var(--background) 0%, transparent 8%),
+    radial-gradient(ellipse at bottom left, var(--background) 0%, transparent 8%),
+    radial-gradient(ellipse at bottom right, var(--background) 0%, transparent 8%);
+  border-radius: inherit;
+}
+/* 封面缩略图标记 - 清除 divIcon 默认样式 */
+.footprint-map .cover-marker,
+.footprint-map .custom-marker {
+  background: none !important;
+  border: none !important;
+}
+.footprint-map .cover-marker img {
+  /* 防止地图滤镜影响标记图片 */
+  filter: none !important;
+}
+.footprint-map .leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+.footprint-map .leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+}
+.footprint-map .leaflet-control-zoom a {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: #57534e;
+}
+.footprint-map .leaflet-control-zoom a:hover {
+  background: rgba(255, 255, 255, 0.92);
+  color: #1c1917;
+}
+.footprint-map .leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(6px);
+  font-size: 10px;
+}
+
+/* Dark mode map - popup & controls */
+.dark .footprint-map .leaflet-popup-content-wrapper {
+  background: rgba(30, 30, 30, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+.dark .footprint-map .leaflet-popup-tip {
+  background: rgba(30, 30, 30, 0.88);
+}
+.dark .footprint-map .leaflet-control-zoom a {
+  background: rgba(30, 30, 30, 0.75);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #a8a29e;
+}
+.dark .footprint-map .leaflet-control-zoom a:hover {
+  background: rgba(30, 30, 30, 0.92);
+  color: #e7e5e4;
+}
+.dark .footprint-map .leaflet-control-attribution {
+  background: rgba(30, 30, 30, 0.5);
+  color: #78716c;
+}
+
+/* Smooth page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
